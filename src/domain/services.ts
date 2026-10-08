@@ -174,7 +174,7 @@ export async function registerCustomer(data: Omit<Customer, "id" | "createdAt" |
   const { password, ...rest } = data;
 
   if (remote) {
-    const { data: res, error } = await remote.auth.signUp({ email, password, options: { data: { customer: { ...rest, email } } } });
+    const { data: res, error } = await remote.auth.signUp({ email, password, options: { data: { customer: { ...rest, email } }, emailRedirectTo: `${window.location.origin}/conta` } });
     if (error) throw authError(error.message);
     if (!res.session || !res.user) return null;
     session.set({ customerId: res.user.id });
@@ -198,6 +198,14 @@ export async function registerCustomer(data: Omit<Customer, "id" | "createdAt" |
 
 export type Role = "admin" | "customer";
 
+/** Conta criada direto no Supabase (sem o formulário do site) não tem ficha de cliente: cria uma mínima. */
+function ensureCustomer(user: { id: string; email?: string; user_metadata?: Record<string, unknown> }) {
+  if (db.customers.get(user.id)) return;
+  const email = user.email ?? "";
+  const meta = (user.user_metadata?.customer ?? {}) as Partial<Customer>;
+  db.customers.insert({ name: email.split("@")[0], phone: "", marketing: false, ...meta, email, id: user.id });
+}
+
 const LOCAL_ADMIN = { email: "admin@mastter.cell", password: "mastter123" };
 
 /** Login único: descobre se a conta é de administrador ou de cliente e abre a sessão certa. */
@@ -208,6 +216,7 @@ export async function signIn(email: string, password: string): Promise<Role> {
     const { data: allowed } = await remote.rpc("is_admin");
     session.set(allowed ? { admin: true, adminEmail: data.user.email, customerId: undefined } : { admin: false, adminEmail: undefined, customerId: data.user.id });
     await reloadAll();
+    if (!allowed) ensureCustomer(data.user);
     return allowed ? "admin" : "customer";
   }
   if (email.trim().toLowerCase() === LOCAL_ADMIN.email && password === LOCAL_ADMIN.password) {
@@ -242,6 +251,7 @@ export function watchAuth() {
       const { data: allowed } = await client.rpc("is_admin");
       session.set(allowed ? { admin: true, adminEmail: auth.user.email, customerId: undefined } : { admin: false, customerId: auth.user.id });
       await reloadAll();
+      if (!allowed) ensureCustomer(auth.user);
     });
   });
 }
