@@ -222,6 +222,15 @@ function ensureCustomer(user: { id: string; email?: string; user_metadata?: Reco
 const LOCAL_ADMIN = { email: "admin@mastter.cell", password: "mastter123" };
 
 /** Login único: descobre se a conta é de administrador ou de cliente e abre a sessão certa. */
+/** Logado mas sem ficha carregada (conta criada direto no Supabase, ou carga atrasada): recarrega e cria se faltar. */
+export async function ensureCurrentCustomer() {
+  if (!remote) return;
+  const { data } = await remote.auth.getUser();
+  if (!data.user) return;
+  await reloadAll();
+  ensureCustomer(data.user);
+}
+
 export async function signIn(email: string, password: string): Promise<Role> {
   if (remote) {
     const { data, error } = await remote.auth.signInWithPassword({ email: email.trim(), password });

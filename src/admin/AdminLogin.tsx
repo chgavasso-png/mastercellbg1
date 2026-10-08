@@ -1,27 +1,18 @@
 import { useState } from "react";
 import { ArrowRight, Lock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { signIn } from "@/domain/services";
 import { Pulse } from "@/ui/Pulse";
+import { AuthTransition } from "@/ui/AuthTransition";
+import { useSignIn } from "@/ui/useSignIn";
 
 export function AdminLogin() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const login = useSignIn();
+  const { error, busy } = login;
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      if ((await signIn(email, password)) === "customer") navigate("/conta");
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setBusy(false);
-    }
+    login.submit(email, password);
   };
 
   return (
@@ -44,6 +35,7 @@ export function AdminLogin() {
         {error && <small className="error">{error}</small>}
         <button className="btn primary lg block" disabled={busy}><Lock />{busy ? "Entrando…" : "Entrar"} <ArrowRight /></button>
       </form>
+      {login.phase && <AuthTransition phase={login.phase} />}
     </div>
   );
 }

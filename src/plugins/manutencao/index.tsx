@@ -3,7 +3,7 @@ import { remote } from "@/core/remote";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   BatteryWarning, Bug, Camera, CircleCheck, Cpu, Droplets, HardDrive, Keyboard, Laptop, MessageCircle, Monitor, MonitorOff, Plug,
-  Search, Smartphone, Tablet, Thermometer, Turtle, Volume2, Wrench, Store, Bike, type LucideIcon,
+  Search, Smartphone, Tablet, Thermometer, Trash2, Turtle, Volume2, Wrench, Store, Bike, type LucideIcon,
 } from "lucide-react";
 import { definePlugin } from "@/core/plugins";
 import { useCollection, useDocument } from "@/core/store";
@@ -314,6 +314,12 @@ function RepairsAdmin() {
               <a className="btn ghost" href={`https://wa.me/55${edit.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${edit.customerName.split(" ")[0]}! Sobre a ${edit.protocol} (${edit.device}): ${repairStatus[edit.status].label}${edit.quote ? ` · orçamento ${money(edit.quote)}` : ""}.${edit.status === "orcamento" && edit.quote ? ` Aceite ou recuse aqui: ${window.location.origin}/assistencia?os=${edit.protocol}` : ""}`)}`} target="_blank" rel="noreferrer">
                 <MessageCircle />Avisar cliente
               </a>
+              <button className="btn danger" onClick={() => {
+                if (!confirm(`Excluir a ${edit.protocol} (${edit.device}) de ${edit.customerName}? Isso não pode ser desfeito.`)) return;
+                db.repairs.remove(edit.id);
+                setEdit(null);
+                toast(`${edit.protocol} excluída`);
+              }}><Trash2 />Excluir</button>
               <span style={{ flex: 1 }} />
               <button className="btn primary" onClick={() => {
                 const { id, ...data } = edit;

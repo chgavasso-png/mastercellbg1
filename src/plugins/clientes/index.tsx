@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Download, LogOut, Package, User, Users, Wrench } from "lucide-react";
 import { definePlugin } from "@/core/plugins";
-import { useCollection } from "@/core/store";
-import { db } from "@/domain/db";
-import { registerCustomer, signIn, signOut, useCustomer } from "@/domain/services";
+import { useCollection, useDocument } from "@/core/store";
+import { db, session } from "@/domain/db";
+import { ensureCurrentCustomer, registerCustomer, signOut, useCustomer } from "@/domain/services";
+import { AuthLoading, AuthTransition } from "@/ui/AuthTransition";
+import { useSignIn } from "@/ui/useSignIn";
 import type { Address, Customer } from "@/domain/types";
 import { day, money, stamp } from "@/core/format";
 import { Card, Kpi, PageHead, SearchBox, Table, matches, type Column } from "@/admin/kit";
@@ -27,11 +29,11 @@ const maskCpf = (v: string) =>
   v.replace(/\D/g, "").slice(0, 11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 
 function AuthForms() {
-  const navigate = useNavigate();
+  const login = useSignIn();
   const [mode, setMode] = useState<"entrar" | "cadastro">("entrar");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [login, setLogin] = useState({ email: "", password: "" });
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [form, setForm] = useState({
     name: "", email: "", phone: "", document: "", birthday: "", password: "", confirm: "", marketing: true, address: emptyAddress,
   });
@@ -50,17 +52,18 @@ function AuthForms() {
 
   return (
     <div className="auth panel">
+      {login.phase && <AuthTransition phase={login.phase} />}
       <div className="tabs">
-        <button className={mode === "entrar" ? "on" : ""} onClick={() => { setMode("entrar"); setError(""); }}>Entrar</button>
-        <button className={mode === "cadastro" ? "on" : ""} onClick={() => { setMode("cadastro"); setError(""); }}>Criar conta</button>
+        <button className={mode === "entrar" ? "on" : ""} onClick={() => { setMode("entrar"); setError(""); login.setError(""); }}>Entrar</button>
+        <button className={mode === "cadastro" ? "on" : ""} onClick={() => { setMode("cadastro"); setError(""); login.setError(""); }}>Criar conta</button>
       </div>
 
       {mode === "entrar" ? (
-        <form className="stack" onSubmit={(e) => { e.preventDefault(); run(async () => { if ((await signIn(login.email, login.password)) === "admin") navigate("/admin"); }); }}>
-          <label className="field"><span>E-mail</span><input type="email" required autoComplete="email" value={login.email} onChange={(e) => setLogin({ ...login, email: e.target.value })} /></label>
-          <label className="field"><span>Senha</span><input type="password" required autoComplete="current-password" value={login.password} onChange={(e) => setLogin({ ...login, password: e.target.value })} /></label>
-          {error && <small className="error">{error}</small>}
-          <button className="btn primary lg block" disabled={busy}>Entrar</button>
+        <form className="stack" onSubmit={(e) => { e.preventDefault(); setError(""); login.submit(credentials.email, credentials.password); }}>
+          <label className="field"><span>E-mail</span><input type="email" required autoComplete="email" value={credentials.email} onChange={(e) => setCredentials({ ...credentials, email: e.target.value })} /></label>
+          <label className="field"><span>Senha</span><input type="password" required autoComplete="current-password" value={credentials.password} onChange={(e) => setCredentials({ ...credentials, password: e.target.value })} /></label>
+          {(login.error || error) && <small className="error">{login.error || error}</small>}
+          <button className="btn primary lg block" disabled={login.busy}>{login.busy ? "Entrando…" : "Entrar"}</button>
           <p className="faint" style={{ textAlign: "center" }}>Primeira vez aqui? <button type="button" className="link" onClick={() => setMode("cadastro")}>Crie sua conta</button></p>
         </form>
       ) : (
@@ -76,7 +79,7 @@ function AuthForms() {
               if (customer) toast(`Bem-vindo(a), ${form.name.split(" ")[0]}!`);
               else {
                 setMode("entrar");
-                setLogin({ email: form.email, password: "" });
+                setCredentials({ email: form.email, password: "" });
                 toast("Conta criada! Confirme pelo link que enviamos ao seu e-mail.");
               }
             });
@@ -201,6 +204,15 @@ function AccountArea({ customer }: { customer: Customer }) {
 
 function AccountPage() {
   const customer = useCustomer();
+  const { customerId } = useDocument(session);
+  const loading = Boolean(customerId && !customer);
+
+  useEffect(() => {
+    if (!loading) return;
+    const t = setTimeout(() => void ensureCurrentCustomer(), 1200);
+    return () => clearTimeout(t);
+  }, [loading]);
+
   return (
     <>
       <section className="page-head">
@@ -212,7 +224,7 @@ function AccountPage() {
         </div>
       </section>
       <div className="wrap section" style={{ paddingTop: 40 }}>
-        {customer ? <AccountArea customer={customer} /> : <AuthForms />}
+        {customer ? <AccountArea customer={customer} /> : loading ? <AuthLoading /> : <AuthForms />}
       </div>
     </>
   );
