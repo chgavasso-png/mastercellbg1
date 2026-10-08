@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Minus, Plus, Printer, Repeat, ShoppingCart, Trash2 } from "lucide-react";
 import { useCollection } from "@/core/store";
 import { db } from "@/domain/db";
-import { addToCart, cart, cartSummary, evaluateTradeIn, placeOrder, setOrderStatus, tradeConditions } from "@/domain/services";
+import { addToCart, cart, cartSummary, deleteOrder, evaluateTradeIn, placeOrder, setOrderStatus, tradeConditions } from "@/domain/services";
 import type { Channel, Order, OrderStatus, Payment } from "@/domain/types";
 import { money, stamp } from "@/core/format";
 import { Card, PageHead, SearchBox, Table, Tabs, matches, type Column } from "@/admin/kit";
@@ -85,6 +85,18 @@ export function Orders() {
                   Cancelar pedido
                 </button>
               )}
+              <button className="btn danger" onClick={() => {
+                const active = current.status !== "cancelado" && current.status !== "entregue";
+                const msg = `Excluir o pedido ${current.code} de ${current.customerName} (${money(current.total)})?
+
+`
+                  + (active ? "Os produtos voltam para o estoque. " : "")
+                  + "Ele some das vendas, do financeiro e da conta do cliente. Isso não pode ser desfeito.";
+                if (!confirm(msg)) return;
+                deleteOrder(current.id);
+                setOpen(null);
+                toast(`Pedido ${current.code} excluído`);
+              }}><Trash2 />Excluir</button>
               <span style={{ flex: 1 }} />
               <button className="btn ghost" onClick={() => window.print()}><Printer />Imprimir</button>
               {flow.indexOf(current.status) >= 0 && flow.indexOf(current.status) < flow.length - 1 && (

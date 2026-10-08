@@ -133,6 +133,15 @@ export function setOrderStatus(id: string, status: OrderStatus) {
   return order;
 }
 
+/** Apaga o pedido de vez. Se ainda estava em andamento, devolve o estoque antes; leva junto a entrega da logística. */
+export function deleteOrder(id: string) {
+  const order = db.orders.get(id);
+  if (!order) return;
+  if (order.status !== "cancelado" && order.status !== "entregue") setOrderStatus(id, "cancelado");
+  db.shipments.all().filter((s) => s.orderId === id).forEach((s) => db.shipments.remove(s.id));
+  db.orders.remove(id);
+}
+
 export function evaluateTradeIn(id: string, value: number) {
   const order = db.orders.get(id);
   if (!order?.tradeIn) return;
