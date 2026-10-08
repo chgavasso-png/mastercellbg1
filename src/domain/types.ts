@@ -12,7 +12,17 @@ export interface Product extends Entity {
   stock: number;
   color: string;
   colors?: string[];
+  /** Resumo curto, abaixo do nome. */
   description: string;
+  /** Pontos fortes em tópicos. */
+  highlights?: string[];
+  /** Descrição completa (## título, - lista, **negrito**). */
+  details?: string;
+  /** Ficha técnica. */
+  specs?: { label: string; value: string }[];
+  /** O que vem na caixa. */
+  inBox?: string[];
+  warranty?: string;
   featured: boolean;
   active: boolean;
   imageUrl?: string;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { CreditCard, Minus, Plus, ReceiptText, Repeat, ShieldCheck, ShoppingBag, Store, Truck, MessageCircle } from "lucide-react";
+import { Check, CreditCard, Minus, PackageOpen, Plus, ReceiptText, Repeat, ShieldCheck, ShoppingBag, Store, Truck, MessageCircle } from "lucide-react";
 import { Slot } from "@/core/plugins";
 import { useCollection, useDocument } from "@/core/store";
 import { categoryLabel, db, store } from "@/domain/db";
@@ -9,6 +9,7 @@ import { installments, money } from "@/core/format";
 import { ProductArt } from "@/ui/ProductArt";
 import { ProductCard } from "@/site/ProductCard";
 import { toast } from "@/ui/Toast";
+import { RichText } from "@/ui/RichText";
 
 export function ProductPage() {
   const { id } = useParams();
@@ -47,7 +48,12 @@ export function ProductPage() {
         <div className="pdp-info">
           <span className="card-product-brand">{product.brand}</span>
           <h1>{product.name}</h1>
-          <p className="muted">{product.description}</p>
+          {product.description && <p className="muted pdp-summary">{product.description}</p>}
+          {product.highlights?.length ? (
+            <ul className="pdp-highlights">
+              {product.highlights.map((h) => <li key={h}><Check />{h}</li>)}
+            </ul>
+          ) : null}
 
           <div className="pdp-price">
             {product.comparePrice && <s className="faint">{money(product.comparePrice)}</s>}
@@ -107,6 +113,45 @@ export function ProductPage() {
           <Slot name="site.product.aside" />
         </div>
       </div>
+
+      {(product.details || product.specs?.length || product.inBox?.length || product.warranty) && (
+        <section className="pdp-about">
+          <div className="pdp-about-main">
+            {product.details && (
+              <>
+                <h2>Sobre o produto</h2>
+                <RichText text={product.details} />
+              </>
+            )}
+            {(product.inBox?.length || product.warranty) && (
+              <div className="pdp-box">
+                {product.inBox?.length ? (
+                  <div>
+                    <h3><PackageOpen />O que vem na caixa</h3>
+                    <ul>{product.inBox.map((i) => <li key={i}>{i}</li>)}</ul>
+                  </div>
+                ) : null}
+                {product.warranty && (
+                  <div>
+                    <h3><ShieldCheck />Garantia</h3>
+                    <p>{product.warranty}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          {product.specs?.length ? (
+            <aside className="pdp-specs">
+              <h2>Ficha técnica</h2>
+              <dl>
+                {product.specs.map((s) => (
+                  <div key={s.label}><dt>{s.label}</dt><dd>{s.value}</dd></div>
+                ))}
+              </dl>
+            </aside>
+          ) : null}
+        </section>
+      )}
 
       {related.length > 0 && (
         <section className="section">

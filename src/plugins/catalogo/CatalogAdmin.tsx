@@ -9,6 +9,7 @@ import { ProductArt } from "@/ui/ProductArt";
 import { ImagePicker } from "@/ui/ImagePicker";
 import { Modal } from "@/ui/Modal";
 import { toast } from "@/ui/Toast";
+import { DescriptionEditor, cleanDescription } from "./DescriptionEditor";
 
 type Draft = Omit<Product, "id" | "createdAt"> & { id?: string };
 
@@ -91,7 +92,7 @@ export function CatalogAdmin() {
 
   const save = () => {
     if (!editing?.name.trim()) return toast("Dê um nome ao produto");
-    const { id, ...data } = editing;
+    const { id, ...data } = cleanDescription(editing);
     if (id) db.products.update(id, data);
     else db.products.insert(data);
     toast(id ? "Produto atualizado" : "Produto publicado na vitrine");
@@ -192,10 +193,7 @@ export function CatalogAdmin() {
                   onChange={(e) => setEditing({ ...editing, colors: e.target.value.split(",").map((c) => c.trim()).filter(Boolean) })}
                 />
               </label>
-              <label className="field span-2">
-                <span>Descrição</span>
-                <textarea value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
-              </label>
+              <DescriptionEditor value={editing} onChange={setEditing} />
               <div className="span-2">
                 <ImagePicker value={editing.imageUrl} onChange={(imageUrl) => setEditing({ ...editing, imageUrl })} label="Foto do produto (opcional)" />
               </div>

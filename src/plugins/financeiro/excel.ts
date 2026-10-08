@@ -77,7 +77,8 @@ function setup(ws: Worksheet, landscape: boolean) {
 
 /** Tabela com cabeçalho escuro, linhas zebradas, filtros e linha de total com fórmula. */
 function table(ws: Worksheet, start: number, cols: Col[], rows: Record<string, unknown>[], totalLabel = "Total") {
-  cols.forEach((c, i) => (ws.getColumn(i + 1).width = c.width));
+  // colunas de valor ganham folga para o botão de filtro não cobrir o título
+  cols.forEach((c, i) => (ws.getColumn(i + 1).width = c.money ? Math.max(c.width, c.header.length + 6) : c.width));
 
   const head = ws.getRow(start);
   head.height = 22;
@@ -86,7 +87,7 @@ function table(ws: Worksheet, start: number, cols: Col[], rows: Record<string, u
     cell.value = c.header;
     cell.fill = fill(NIGHT);
     cell.font = { name: FONT, size: 10, bold: true, color: { argb: WHITE } };
-    cell.alignment = { vertical: "middle", horizontal: c.money || c.pct ? "right" : c.align ?? "left" };
+    cell.alignment = { vertical: "middle", horizontal: c.align ?? "left" };
     cell.border = { bottom: { style: "medium", color: { argb: BRAND } } };
   });
 

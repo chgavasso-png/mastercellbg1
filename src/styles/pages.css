@@ -2001,3 +2001,298 @@
     justify-content: center;
   }
 }
+
+/* ── Descrição do produto (loja) ─────────────────────── */
+.pdp-summary {
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.pdp-highlights {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.pdp-highlights li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pdp-highlights svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--night);
+}
+
+.pdp-about {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+  margin: 48px 0 8px;
+  padding-top: 40px;
+  border-top: 1px solid var(--line);
+}
+
+.pdp-about h2 {
+  margin: 0 0 16px;
+  font-size: 24px;
+}
+
+.rich {
+  display: grid;
+  gap: 12px;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.rich p,
+.rich ul {
+  margin: 0;
+}
+
+.rich h4 {
+  margin: 10px 0 0;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.rich ul {
+  display: grid;
+  gap: 6px;
+  padding-left: 20px;
+}
+
+.rich li::marker {
+  color: var(--brand-strong);
+}
+
+.rich strong {
+  color: var(--ink);
+}
+
+.pdp-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.pdp-box > div {
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.pdp-box h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.pdp-box h3 svg {
+  width: 18px;
+  height: 18px;
+  color: var(--brand-strong);
+}
+
+.pdp-box ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-2);
+}
+
+.pdp-box p {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.pdp-specs {
+  position: sticky;
+  top: 96px;
+  padding: 22px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.pdp-specs dl {
+  margin: 0;
+}
+
+.pdp-specs dl > div {
+  display: grid;
+  grid-template-columns: 42% 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.pdp-specs dl > div:last-child {
+  border-bottom: 0;
+}
+
+.pdp-specs dt {
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+.pdp-specs dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .pdp-about {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .pdp-specs {
+    position: static;
+  }
+}
+
+/* ── Editor de descrição (painel) ────────────────────── */
+.desc-editor {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.desc-editor input,
+.desc-editor textarea {
+  background: #fff;
+}
+
+.lines-editor {
+  display: grid;
+  gap: 6px;
+}
+
+.lines-editor ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lines-editor li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lines-editor li input,
+.lines-editor .row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.lines-editor .grip {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--ink-3);
+  cursor: grab;
+}
+
+.specs-editor {
+  display: grid;
+  gap: 6px;
+}
+
+.specs-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr) auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.details-editor {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.details-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.details-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.details-bar button:hover:not(:disabled),
+.details-bar button.on {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.details-bar button:disabled {
+  opacity: 0.4;
+}
+
+.details-bar svg {
+  width: 14px;
+  height: 14px;
+}
+
+.details-editor textarea {
+  width: 100%;
+  min-height: 180px;
+  border: 0;
+  border-radius: 0;
+  resize: vertical;
+  box-shadow: none;
+}
+
+.details-preview {
+  min-height: 180px;
+  padding: 14px;
+}
+
+@media (max-width: 560px) {
+  .specs-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .specs-row input:first-child {
+    grid-column: 1 / -1;
+    font-weight: 700;
+  }
+}

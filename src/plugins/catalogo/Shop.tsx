@@ -37,7 +37,7 @@ export function Shop() {
         p.active &&
         (!category || p.category === category) &&
         (!brand || p.brand === brand) &&
-        (!term || `${p.name} ${p.brand} ${p.description}`.toLowerCase().includes(term)),
+        (!term || `${p.name} ${p.brand} ${p.description} ${p.highlights?.join(" ") ?? ""} ${p.specs?.map((s) => s.value).join(" ") ?? ""}`.toLowerCase().includes(term)),
     );
     const by = {
       relevancia: (a: typeof filtered[0], b: typeof filtered[0]) => Number(b.featured) - Number(a.featured) || Number(b.stock > 0) - Number(a.stock > 0),
