@@ -1,9 +1,9 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useCollection } from "@/core/store";
-import { money } from "@/core/format";
+import { day, money } from "@/core/format";
 import { db } from "@/domain/db";
 import type { Customer, Order, Repair } from "@/domain/types";
-import { orderStatus, repairStatus } from "./status";
+import { orderStatus, repairStatus, shipmentStatus } from "./status";
 import { toast } from "./Toast";
 
 export type Note = { id: string; text: string; to: string; at: string; read: boolean };
@@ -14,7 +14,7 @@ export type Note = { id: string; text: string; to: string; at: string; read: boo
  */
 type Memory = { since: string; seen: Record<string, string>; notes: Note[] };
 
-const KEY = (who: string) => `master:notes:${who}`;
+const KEY = (who: string) => `master:notes:v2:${who}`;
 const MAX = 40;
 
 function load(who: string): Memory {
@@ -61,7 +61,12 @@ function alert(note: Note) {
   }
 }
 
-type Change = { key: string; sig: string; created: string; text?: string; to: string };
+/** `text` recebe a assinatura anterior, para dizer exatamente o que mudou. */
+type Change = { key: string; sig: string; created: string; text?: (before: string) => string | undefined; to: string };
+
+const SEP = "\u001f";
+const sig = (...values: unknown[]) => values.map((v) => (v === undefined || v === null ? "" : String(v))).join(SEP);
+const parts = (s: string) => s.split(SEP);
 
 /** Compara com o que já foi visto e gera as notificações novas. */
 function digest(who: string, changes: Change[], isNew: (c: Change) => string | undefined) {
@@ -72,7 +77,7 @@ function digest(who: string, changes: Change[], isNew: (c: Change) => string | u
     const before = seen[c.key];
     seen[c.key] = c.sig;
     if (before === c.sig) continue;
-    const text = before === undefined ? (c.created > memory.since ? isNew(c) : undefined) : c.text;
+    const text = before === undefined ? (c.created > memory.since ? isNew(c) : undefined) : c.text?.(before);
     if (text) fresh.push({ id: `${c.key}:${c.sig}:${Date.now()}`, text, to: c.to, at: new Date().toISOString(), read: false });
   }
   if (!fresh.length && Object.keys(seen).length === Object.keys(memory.seen).length && Object.entries(seen).every(([k, v]) => memory.seen[k] === v)) return;
@@ -80,11 +85,37 @@ function digest(who: string, changes: Change[], isNew: (c: Change) => string | u
   fresh.forEach(alert);
 }
 
-const repairText = (r: Repair) => {
-  if (r.status === "pronto") return `${r.protocol} · ${r.device} está pronto para retirada!`;
-  if (r.status === "orcamento" && r.quote) return `${r.protocol} · orçamento de ${money(r.quote)} disponível. Toque para aceitar ou recusar.`;
-  return `${r.protocol} · ${r.device}: ${repairStatus[r.status].label}`;
-};
+const repairSig = (r: Repair) => sig(r.status, r.quote, r.note);
+
+function repairText(r: Repair, before: string) {
+  const [status, quote] = parts(before);
+  const head = `${r.protocol} · ${r.device}`;
+  if (status !== r.status) {
+    if (r.status === "pronto") return `${head} está pronto para retirada!`;
+    if (r.status === "orcamento" && r.quote) return `${head}: orçamento de ${money(r.quote)} disponível. Toque para aceitar ou recusar.`;
+    return `${head}: ${repairStatus[r.status].label}`;
+  }
+  if (quote !== String(r.quote ?? "")) return r.quote ? `${head}: orçamento atualizado para ${money(r.quote)}` : `${head}: orçamento removido`;
+  return r.note ? `${head}: nova observação da loja — "${r.note}"` : `${head}: a loja atualizou sua OS`;
+}
+
+const orderSig = (o: Order) => sig(o.status, o.shipment?.status, o.shipment?.carrier, o.shipment?.tracking, o.shipment?.eta, o.tradeIn?.value);
+
+function orderText(o: Order, before: string) {
+  const [status, shipStatus, carrier, tracking, eta, tradeValue] = parts(before);
+  const head = `Pedido ${o.code}`;
+  const s = o.shipment;
+  if (status !== o.status) {
+    if (o.status === "entregue") return `${head} foi entregue. Obrigado pela compra!`;
+    return `${head}: ${orderStatus[o.status].label}`;
+  }
+  if (s && shipStatus !== s.status) return `${head}: entrega — ${shipmentStatus[s.status].label}${s.carrier !== "Retirada" ? ` (${s.carrier})` : ""}`;
+  if (s?.tracking && tracking !== s.tracking) return `${head}: código de rastreio ${s.tracking}`;
+  if (s?.eta && eta !== s.eta) return `${head}: nova previsão de entrega ${day(s.eta)}`;
+  if (s && carrier !== s.carrier) return `${head}: entrega agora por ${s.carrier}`;
+  if (o.tradeIn?.value && tradeValue !== String(o.tradeIn.value)) return `${head}: seu ${o.tradeIn.device} foi avaliado em ${money(o.tradeIn.value)}`;
+  return `${head}: a loja atualizou seu pedido`;
+}
 
 /** Cliente: avisa quando a loja muda o status das suas OS e pedidos. */
 export function useCustomerNotifications(customer?: Customer) {
@@ -98,10 +129,10 @@ export function useCustomerNotifications(customer?: Customer) {
       customer.id,
       [
         ...repairs.filter(mine).map((r) => ({
-          key: `r:${r.id}`, sig: `${r.status}|${r.quote ?? ""}`, created: r.createdAt, text: repairText(r), to: "/conta?aba=assistencia",
+          key: `r:${r.id}`, sig: repairSig(r), created: r.createdAt, text: (before: string) => repairText(r, before), to: "/conta?aba=assistencia",
         })),
         ...orders.filter((o) => o.customerId === customer.id).map((o) => ({
-          key: `o:${o.id}`, sig: o.status, created: o.createdAt, text: `Pedido ${o.code}: ${orderStatus[o.status].label}`, to: "/conta?aba=pedidos",
+          key: `o:${o.id}`, sig: orderSig(o), created: o.createdAt, text: (before: string) => orderText(o, before), to: "/conta?aba=pedidos",
         })),
       ],
       () => undefined, // o próprio cliente criou: não precisa avisar
@@ -122,7 +153,7 @@ export function useAdminNotifications() {
       [
         ...repairs.map((r) => ({
           key: `r:${r.id}`, sig: r.answer ?? "", created: r.createdAt, to: "/admin/assistencia",
-          text: r.answer ? `${r.customerName} ${r.answer === "aceito" ? "aceitou" : "recusou"} o orçamento da ${r.protocol}` : undefined,
+          text: () => (r.answer ? `${r.customerName} ${r.answer === "aceito" ? "aceitou" : "recusou"} o orçamento da ${r.protocol}` : undefined),
           repair: r,
         })),
         ...orders.map((o: Order) => ({ key: `o:${o.id}`, sig: "", created: o.createdAt, to: "/admin/vendas", order: o })),

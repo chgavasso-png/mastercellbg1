@@ -14,8 +14,16 @@ import { toast } from "@/ui/Toast";
 
 const columns: ShipmentStatus[] = ["aguardando", "postado", "transito", "entregue"];
 
+/** Copia a situação da entrega para o pedido: é por ele que o cliente acompanha e é avisado. */
+function mirror(id: string) {
+  const s = db.shipments.get(id);
+  if (!s || !db.orders.get(s.orderId)) return;
+  db.orders.update(s.orderId, { shipment: { status: s.status, carrier: s.carrier, tracking: s.tracking, eta: s.eta } });
+}
+
 function move(shipment: Shipment, status: ShipmentStatus) {
   db.shipments.update(shipment.id, { status });
+  mirror(shipment.id);
   const order = db.orders.get(shipment.orderId);
   if (!order) return;
   if ((status === "postado" || status === "transito") && order.status !== "enviado") setOrderStatus(order.id, "enviado");
@@ -25,7 +33,7 @@ function move(shipment: Shipment, status: ShipmentStatus) {
 function ship(order: Order) {
   if (!session.get().admin || order.delivery !== "entrega" || !["pago", "separacao"].includes(order.status)) return;
   if (db.shipments.find((s) => s.orderId === order.id)) return;
-  db.shipments.insert({
+  const created = db.shipments.insert({
     orderId: order.id,
     orderCode: order.code,
     customerName: order.customerName,
@@ -35,6 +43,7 @@ function ship(order: Order) {
     cost: 12,
     eta: new Date(Date.now() + 2 * 864e5).toISOString(),
   });
+  mirror(created.id);
 }
 
 function Logistics() {
@@ -112,6 +121,7 @@ function Logistics() {
                 db.shipments.update(id, rest);
                 const original = shipments.find((s) => s.id === id);
                 if (original && original.status !== status) move(original, status);
+                else mirror(id);
                 setEdit(null);
                 toast("Entrega atualizada");
               }}>Salvar</button>

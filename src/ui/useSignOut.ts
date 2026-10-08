@@ -2,13 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "@/domain/services";
 
 /**
- * Sair sempre leva à página inicial da loja. Espera a navegação terminar antes de
- * limpar a sessão — senão a página atual (painel ou conta) troca para a tela de login no caminho.
+ * Sair sempre leva à tela de login da loja (/conta), tanto do painel quanto da conta do cliente.
+ * Navega antes de limpar a sessão — senão o painel troca para o login do admin no caminho.
  */
 export function useSignOut() {
   const navigate = useNavigate();
   return async () => {
-    await navigate("/", { replace: true });
+    await navigate("/conta", { replace: true });
     await signOut();
   };
 }

@@ -13,7 +13,7 @@ import { day, money, stamp } from "@/core/format";
 import { Card, Kpi, PageHead, SearchBox, Table, matches, type Column } from "@/admin/kit";
 import { Modal } from "@/ui/Modal";
 import { Pulse } from "@/ui/Pulse";
-import { Status, orderStatus, repairStatus } from "@/ui/status";
+import { Status, orderStatus, repairStatus, shipmentStatus } from "@/ui/status";
 import { QuoteAnswer } from "@/ui/QuoteAnswer";
 import { toast } from "@/ui/Toast";
 
@@ -150,6 +150,13 @@ function AccountArea({ customer }: { customer: Customer }) {
                     {o.tradeIn && (
                       <p className="faint">
                         Seu {o.tradeIn.device} na troca · {o.tradeIn.value ? `avaliado em ${money(o.tradeIn.value)}` : "aguardando avaliação"}
+                      </p>
+                    )}
+                    {o.shipment && o.shipment.carrier !== "Retirada" && (
+                      <p className="faint">
+                        <Status map={shipmentStatus} value={o.shipment.status} /> {o.shipment.carrier}
+                        {o.shipment.tracking && <> · rastreio <b>{o.shipment.tracking}</b></>}
+                        {o.shipment.eta && o.shipment.status !== "entregue" && <> · previsão {day(o.shipment.eta)}</>}
                       </p>
                     )}
                     <div className="row between">

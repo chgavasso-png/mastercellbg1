@@ -74,6 +74,8 @@ export interface Order extends Entity {
   address?: Address;
   coupon?: string;
   tradeIn?: TradeIn;
+  /** Cópia da entrega (logística) dentro do pedido, para o cliente — que não lê a coleção de entregas — acompanhar. */
+  shipment?: Pick<Shipment, "status" | "carrier" | "tracking" | "eta">;
 }
 
 export interface Purchase extends Entity {
