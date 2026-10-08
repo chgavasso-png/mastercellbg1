@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96">
+  <rect x="3" y="3" width="314" height="90" rx="45" fill="#070c2f" stroke="#fcd404" stroke-width="4"/>
+  <g transform="translate(48 48) rotate(45)">
+    <rect x="-20" y="-20" width="40" height="40" rx="9" fill="#fcd404"/>
+    <rect x="-8" y="-8" width="16" height="16" rx="3" fill="#070c2f"/>
+  </g>
+  <text x="92" y="44" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-style="italic" font-size="30" fill="#fcd404">5% OFF</text>
+  <text x="93" y="72" font-family="Manrope, Arial, sans-serif" font-weight="700" font-size="18" letter-spacing="2" fill="#ffffff">PAGANDO NO PIX</text>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect x="8" y="8" width="224" height="224" rx="56" fill="#fcd404"/>
+  <rect x="8" y="8" width="224" height="224" rx="56" fill="none" stroke="#070c2f" stroke-width="6"/>
+  <rect x="78" y="34" width="84" height="150" rx="18" fill="#070c2f" transform="rotate(-10 120 109)"/>
+  <rect x="88" y="46" width="64" height="118" rx="10" fill="#131f7b" transform="rotate(-10 120 109)"/>
+  <path d="M90 110 L 106 110 L 114 92 L 124 130 L 132 104 L 138 110 L 152 110" fill="none" stroke="#fcd404" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-10 120 109)"/>
+  <text x="120" y="214" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-style="italic" font-size="26" fill="#070c2f">CONSERTO</text>
+</svg>

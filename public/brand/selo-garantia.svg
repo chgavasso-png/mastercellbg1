@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <path id="ring" d="M120 120 m-86 0 a86 86 0 1 1 172 0 a86 86 0 1 1 -172 0"/>
+  </defs>
+  <circle cx="120" cy="120" r="116" fill="#070c2f"/>
+  <circle cx="120" cy="120" r="108" fill="none" stroke="#fcd404" stroke-width="2" stroke-dasharray="2 6"/>
+  <text font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="19" letter-spacing="5.2" fill="#fff">
+    <textPath href="#ring">GARANTIA REAL • MASTTER CELL • GARANTIA REAL •</textPath>
+  </text>
+  <circle cx="120" cy="120" r="62" fill="#fcd404"/>
+  <text x="120" y="122" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-style="italic" font-size="46" fill="#070c2f">90</text>
+  <text x="120" y="150" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="16" letter-spacing="3" fill="#070c2f">DIAS</text>
+</svg>
