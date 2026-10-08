@@ -1,4 +1,4 @@
-import { createDocument, isRemote, useDocument } from "@/core/store";
+import { createDocument, isRemote, useCollection, useDocument } from "@/core/store";
 import { nextNumber, reloadAll, remote } from "@/core/remote";
 import { events } from "@/core/events";
 import { hash } from "@/core/format";
@@ -219,7 +219,7 @@ function ensureCustomer(user: { id: string; email?: string; user_metadata?: Reco
   db.customers.insert({ name: email.split("@")[0], phone: "", marketing: false, ...meta, email, id: user.id });
 }
 
-const LOCAL_ADMIN = { email: "admin@mastter.cell", password: "mastter123" };
+const LOCAL_ADMIN = { email: "admin@master.cell", password: "master123" };
 
 /** Login único: descobre se a conta é de administrador ou de cliente e abre a sessão certa. */
 /** Logado mas sem ficha carregada (conta criada direto no Supabase, ou carga atrasada): recarrega e cria se faltar. */
@@ -280,5 +280,7 @@ export function watchAuth() {
 
 export const useCustomer = () => {
   const { customerId } = useDocument(session);
-  return customerId ? db.customers.get(customerId) : undefined;
+  // Assina a coleção também: a ficha costuma chegar do banco depois da sessão.
+  const customers = useCollection(db.customers);
+  return customerId ? customers.find((c) => c.id === customerId) : undefined;
 };

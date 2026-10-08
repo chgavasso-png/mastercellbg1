@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Download, LogOut, Package, User, Users, Wrench } from "lucide-react";
 import { definePlugin } from "@/core/plugins";
 import { useCollection, useDocument } from "@/core/store";
@@ -109,7 +109,11 @@ function AuthForms() {
 function AccountArea({ customer }: { customer: Customer }) {
   const orders = useCollection(db.orders).filter((o) => o.customerId === customer.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const repairs = useCollection(db.repairs).filter((r) => r.customerId === customer.id || (r.phone && r.phone === customer.phone));
-  const [tab, setTab] = useState<"pedidos" | "assistencia" | "dados">("pedidos");
+  type Tab = "pedidos" | "assistencia" | "dados";
+  const [params, setParams] = useSearchParams();
+  const asked = params.get("aba");
+  const tab: Tab = asked === "assistencia" || asked === "dados" ? asked : "pedidos";
+  const setTab = (t: Tab) => setParams({ aba: t }, { replace: true });
   const [data, setData] = useState(customer);
 
   return (
@@ -206,11 +210,17 @@ function AccountPage() {
   const customer = useCustomer();
   const { customerId } = useDocument(session);
   const loading = Boolean(customerId && !customer);
+  const [stuck, setStuck] = useState(false);
 
   useEffect(() => {
+    setStuck(false);
     if (!loading) return;
-    const t = setTimeout(() => void ensureCurrentCustomer(), 1200);
-    return () => clearTimeout(t);
+    const retry = setTimeout(() => void ensureCurrentCustomer(), 1200);
+    const giveUp = setTimeout(() => setStuck(true), 8000);
+    return () => {
+      clearTimeout(retry);
+      clearTimeout(giveUp);
+    };
   }, [loading]);
 
   return (
@@ -224,7 +234,22 @@ function AccountPage() {
         </div>
       </section>
       <div className="wrap section" style={{ paddingTop: 40 }}>
-        {customer ? <AccountArea customer={customer} /> : loading ? <AuthLoading /> : <AuthForms />}
+        {customer ? (
+          <AccountArea customer={customer} />
+        ) : loading && stuck ? (
+          <div className="panel empty">
+            <User />
+            <p>Não conseguimos carregar sua conta.</p>
+            <div className="row" style={{ justifyContent: "center" }}>
+              <button className="btn primary" onClick={() => window.location.reload()}>Tentar de novo</button>
+              <button className="btn ghost" onClick={signOut}>Sair</button>
+            </div>
+          </div>
+        ) : loading ? (
+          <AuthLoading />
+        ) : (
+          <AuthForms />
+        )}
       </div>
     </>
   );

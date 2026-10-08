@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation, Link } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
 import { ExternalLink, LayoutDashboard, LogOut, Menu, Puzzle, RotateCcw } from "lucide-react";
 import { adminPages, plugins } from "@/core/plugins";
 import { useDocument } from "@/core/store";
@@ -10,6 +10,8 @@ import { Brand } from "@/site/Brand";
 import { Modal } from "@/ui/Modal";
 import { toast } from "@/ui/Toast";
 import { AdminLogin } from "./AdminLogin";
+import { NotificationBell } from "@/ui/NotificationBell";
+import { useAdminNotifications } from "@/ui/notifications";
 
 export function AdminLayout() {
   const { admin, adminEmail } = useDocument(session);
@@ -17,6 +19,8 @@ export function AdminLayout() {
   const [open, setOpen] = useState(false);
   const [about, setAbout] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const notes = useAdminNotifications();
 
   useEffect(() => setOpen(false), [location.pathname]);
 
@@ -52,7 +56,7 @@ export function AdminLayout() {
         <div className="a-side-foot">
           <button onClick={() => setAbout(true)}><Puzzle />{plugins().length} módulos ativos</button>
           <Link to="/" target="_blank"><ExternalLink />Ver loja</Link>
-          <button onClick={() => signOut()}><LogOut />Sair</button>
+          <button onClick={async () => { navigate("/", { replace: true }); await signOut(); }}><LogOut />Sair</button>
         </div>
       </aside>
       <div className="a-scrim" onClick={() => setOpen(false)} />
@@ -61,6 +65,7 @@ export function AdminLayout() {
           <button className="icon-btn a-burger" onClick={() => setOpen(true)} aria-label="Menu"><Menu /></button>
           <span className="faint hide-sm a-date">{new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</span>
           <div className="row" style={{ marginLeft: "auto" }}>
+            <NotificationBell {...notes} />
             <span className="a-user">
               <span className="avatar">{info.name[0]}</span>
               <span className="hide-sm">{adminEmail}</span>

@@ -19,7 +19,7 @@ export function AdminLogin() {
     <div className="a-login">
       <Pulse className="a-login-pulse" />
       <form onSubmit={submit} className="a-login-card">
-        <img src="/brand/logo.png" alt="Mastter Cell" />
+        <img src="/brand/logo.png" alt="MasterCell" />
         <div>
           <h1>Painel da loja</h1>
           <p className="muted">Entre para gerenciar vitrine, vendas e assistência.</p>

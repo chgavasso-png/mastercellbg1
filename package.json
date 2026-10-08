@@ -1,13 +1,12 @@
 {
-  "name": "mastter-cell",
+  "name": "master-cell",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "palette": "node scripts/palette.mjs",
-    "predev": "node scripts/palette.mjs",
     "dev": "vite",
-    "build": "node scripts/palette.mjs && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

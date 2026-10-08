@@ -14,7 +14,7 @@ type Draft = Omit<Product, "id" | "createdAt"> & { id?: string };
 
 const blank = (): Draft => ({
   name: "",
-  brand: "Mastter",
+  brand: "MasterCell",
   category: "capinhas",
   price: 0,
   cost: 0,

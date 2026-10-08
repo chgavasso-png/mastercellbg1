@@ -15,7 +15,7 @@ export const db = {
 };
 
 export const store = createDocument("store", {
-  name: "Mastter Cell",
+  name: "MasterCell",
   tagline: "Celulares e acessórios · assistência técnica em celulares, tablets, notebooks e computadores",
   instagram: "mastercellbg",
   phone: "(66) 99247-3929",

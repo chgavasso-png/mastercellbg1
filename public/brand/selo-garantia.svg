@@ -5,7 +5,7 @@
   <circle cx="120" cy="120" r="116" fill="#070c2f"/>
   <circle cx="120" cy="120" r="108" fill="none" stroke="#fcd404" stroke-width="2" stroke-dasharray="2 6"/>
   <text font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="19" letter-spacing="5.2" fill="#fff">
-    <textPath href="#ring">GARANTIA REAL • MASTTER CELL • GARANTIA REAL •</textPath>
+    <textPath href="#ring">GARANTIA REAL • MASTER CELL • GARANTIA REAL •</textPath>
   </text>
   <circle cx="120" cy="120" r="62" fill="#fcd404"/>
   <text x="120" y="122" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-style="italic" font-size="46" fill="#070c2f">90</text>

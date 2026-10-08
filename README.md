@@ -1,4 +1,4 @@
-# Mastter Cell
+# MasterCell
 
 Loja virtual + painel administrativo para loja de celulares, acessórios e assistência técnica.
 React + TypeScript + Vite, organizado em **plugins**: cada funcionalidade é uma pasta independente.
@@ -9,12 +9,12 @@ npm run dev        # http://localhost:5173  ·  painel em /admin
 npm run build
 ```
 
-Acesso ao painel no modo local (sem Supabase): `admin@mastter.cell` / `mastter123`. Com Supabase, o login é o do usuário administrador.
+Acesso ao painel no modo local (sem Supabase): `admin@master.cell` / `master123`. Com Supabase, o login é o do usuário administrador.
 
 ## Cores a partir do logo
 
 `npm run palette` lê a primeira imagem de `assets/` e gera `src/styles/palette.css`.
-Roda sozinho antes do `dev` e do `build` — trocou o logo, trocou o site inteiro.
+Roda só quando você chama — assim trocar o logo não muda as cores do site sem querer.
 
 ## Estrutura
 

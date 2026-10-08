@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { MapPin, Menu, MessageCircle, Phone, Search, ShoppingBag, User, X, Clock } from "lucide-react";
+import { MapPin, Menu, MessageCircle, Phone, Search, ShoppingBag, X, Clock } from "lucide-react";
 import { Slot, siteNav } from "@/core/plugins";
 import { useDocument } from "@/core/store";
 import { store } from "@/domain/db";
@@ -9,11 +9,15 @@ import { Instagram } from "@/ui/Instagram";
 import { Brand } from "./Brand";
 import { CartDrawer } from "./CartDrawer";
 import { TradeInOffer } from "./TradeIn";
+import { UserMenu } from "./UserMenu";
+import { NotificationBell } from "@/ui/NotificationBell";
+import { useCustomerNotifications } from "@/ui/notifications";
 
 export function SiteLayout() {
   const info = useDocument(store);
   const { lines } = useCart();
   const customer = useCustomer();
+  const notes = useCustomerNotifications(customer);
   const count = cartSummary(lines).count;
   const [menu, setMenu] = useState(false);
   const [query, setQuery] = useState("");
@@ -65,9 +69,8 @@ export function SiteLayout() {
             <input placeholder="Buscar celular, capinha…" value={query} onChange={(e) => setQuery(e.target.value)} />
           </form>
           <div className="row">
-            <Link to="/conta" className="icon-btn" aria-label="Minha conta" title={customer ? customer.name : "Entrar"}>
-              {customer ? <span className="avatar">{customer.name[0]}</span> : <User />}
-            </Link>
+            {customer && <NotificationBell {...notes} />}
+            <UserMenu />
             <button className="icon-btn cart-btn" onClick={() => cart.set({ open: true })} aria-label="Abrir carrinho">
               <ShoppingBag />
               {count > 0 && <span className="badge">{count}</span>}
@@ -83,7 +86,7 @@ export function SiteLayout() {
       <footer className="site-footer">
         <div className="wrap">
           <div className="footer-brand">
-            <img src="/brand/logo.png" alt="Mastter Cell" />
+            <img src="/brand/logo.png" alt="MasterCell" />
             <p>{info.tagline}. Celulares novos em até 18x no boleto, até 12x no cartão com taxas baixas, Brasilcard e seu usado (até quebrado) como entrada.</p>
             <div className="row">
               <a className="icon-btn" href={`https://instagram.com/${info.instagram}`} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram /></a>

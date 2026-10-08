@@ -224,7 +224,7 @@ function RepairPage() {
             {lookup.trim().length >= 4 && !found && <p className="faint" style={{ marginTop: 10 }}>Protocolo não encontrado.</p>}
           </div>
           <div className="panel why">
-            <h3>Por que a Mastter?</h3>
+            <h3>Por que a MasterCell?</h3>
             <ul>
               <li><CircleCheck />Orçamento sem compromisso</li>
               <li><CircleCheck />Peças testadas antes da troca</li>

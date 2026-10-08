@@ -73,7 +73,7 @@ function Identity() {
             <span className="flag flag-off">-25%</span>
             <span className="flag">Últimas 3</span>
             <span className="flag flag-dark">Esgotado</span>
-            <code className="code">MASTTER10</code>
+            <code className="code">MASTER10</code>
           </div>
           <div className="kit-row">
             <span className="pill ok">Entregue</span>
@@ -83,7 +83,7 @@ function Identity() {
             <span className="pill brand">Em reparo</span>
           </div>
           <div className="kit-row dark">
-            <span className="brand-word">Mastter<b>Cell</b></span>
+            <span className="brand-word">Master<b>Cell</b></span>
             <Pulse className="kit-pulse" />
           </div>
         </Card>

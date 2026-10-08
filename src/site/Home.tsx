@@ -52,7 +52,7 @@ export function Home() {
           </div>
           <div className="hero-visual">
             <div className="hero-glow" />
-            <img src="/brand/logo.png" alt="Mastter Cell" className="hero-logo" />
+            <img src="/brand/logo.png" alt="MasterCell" className="hero-logo" />
             <img src="/brand/selo-garantia.svg" alt="Garantia de 90 dias" className="hero-seal" />
             <div className="hero-chip chip-a"><Zap /> Conserto de celular, notebook e PC</div>
             <div className="hero-chip chip-b"><Truck /> Entrega na cidade</div>
