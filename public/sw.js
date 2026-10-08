@@ -1,6 +1,6 @@
 // Service worker do app MasterCell: permite instalar e abrir sem internet (mostra a última versão).
 // Dados (Supabase) nunca passam por aqui — são de outro domínio e sempre vêm frescos.
-const VERSION = "mc-v1";
+const VERSION = "mc-v2";
 const SHELL = ["/", "/manifest.webmanifest", "/brand/app-192.png", "/brand/logo.png"];
 
 self.addEventListener("install", (event) => {
@@ -30,8 +30,13 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
 
   // Páginas: sempre tenta a rede (versão nova); sem internet, abre a última salva.
+  // O site é uma página só: se o servidor responder erro (ex.: 404 numa rota do app), usa a página salva.
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).then((res) => save("/", res)).catch(() => caches.match("/")));
+    event.respondWith(
+      fetch(request)
+        .then((res) => (res.ok ? save("/", res) : caches.match("/").then((hit) => hit || res)))
+        .catch(() => caches.match("/")),
+    );
     return;
   }
 
