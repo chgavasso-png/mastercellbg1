@@ -173,7 +173,8 @@ async function loadLogo(wb: Workbook) {
   }
 }
 
-export async function downloadMonthExcel(report: MonthReport) {
+/** Monta a planilha do mês (sem baixar). */
+export async function buildMonthWorkbook(report: MonthReport) {
   const { default: ExcelJS } = await import("exceljs");
   const wb = new ExcelJS.Workbook();
   const info = store.get();
@@ -357,7 +358,12 @@ export async function downloadMonthExcel(report: MonthReport) {
   }
   setup(ls, true);
 
-  const buffer = await wb.xlsx.writeBuffer();
+  return wb.xlsx.writeBuffer();
+}
+
+export async function downloadMonthExcel(report: MonthReport) {
+  const info = store.get();
+  const buffer = await buildMonthWorkbook(report);
   const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
