@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Download, LogOut, Package, User, Users, Wrench } from "lucide-react";
 import { definePlugin } from "@/core/plugins";
 import { useCollection } from "@/core/store";
@@ -26,6 +26,7 @@ const maskCpf = (v: string) =>
   v.replace(/\D/g, "").slice(0, 11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 
 function AuthForms() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<"entrar" | "cadastro">("entrar");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -54,7 +55,7 @@ function AuthForms() {
       </div>
 
       {mode === "entrar" ? (
-        <form className="stack" onSubmit={(e) => { e.preventDefault(); run(() => signIn(login.email, login.password)); }}>
+        <form className="stack" onSubmit={(e) => { e.preventDefault(); run(async () => { if ((await signIn(login.email, login.password)) === "admin") navigate("/admin"); }); }}>
           <label className="field"><span>E-mail</span><input type="email" required autoComplete="email" value={login.email} onChange={(e) => setLogin({ ...login, email: e.target.value })} /></label>
           <label className="field"><span>Senha</span><input type="password" required autoComplete="current-password" value={login.password} onChange={(e) => setLogin({ ...login, password: e.target.value })} /></label>
           {error && <small className="error">{error}</small>}

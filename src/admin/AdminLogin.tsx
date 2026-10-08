@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { ArrowRight, Lock } from "lucide-react";
-import { adminSignIn } from "@/domain/services";
+import { useNavigate } from "react-router-dom";
+import { signIn } from "@/domain/services";
 import { Pulse } from "@/ui/Pulse";
 
 export function AdminLogin() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -14,7 +16,7 @@ export function AdminLogin() {
     setBusy(true);
     setError("");
     try {
-      await adminSignIn(email, password);
+      if ((await signIn(email, password)) === "customer") navigate("/conta");
     } catch (err) {
       setError((err as Error).message);
     } finally {

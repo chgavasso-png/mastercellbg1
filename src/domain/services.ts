@@ -196,19 +196,29 @@ export async function registerCustomer(data: Omit<Customer, "id" | "createdAt" |
   return customer;
 }
 
-export async function signIn(email: string, password: string) {
+export type Role = "admin" | "customer";
+
+const LOCAL_ADMIN = { email: "admin@mastter.cell", password: "mastter123" };
+
+/** Login único: descobre se a conta é de administrador ou de cliente e abre a sessão certa. */
+export async function signIn(email: string, password: string): Promise<Role> {
   if (remote) {
     const { data, error } = await remote.auth.signInWithPassword({ email: email.trim(), password });
     if (error) throw authError(error.message);
-    session.set({ customerId: data.user.id });
+    const { data: allowed } = await remote.rpc("is_admin");
+    session.set(allowed ? { admin: true, adminEmail: data.user.email, customerId: undefined } : { admin: false, adminEmail: undefined, customerId: data.user.id });
     await reloadAll();
-    return db.customers.get(data.user.id);
+    return allowed ? "admin" : "customer";
+  }
+  if (email.trim().toLowerCase() === LOCAL_ADMIN.email && password === LOCAL_ADMIN.password) {
+    session.set({ admin: true, adminEmail: LOCAL_ADMIN.email, customerId: undefined });
+    return "admin";
   }
   const customer = db.customers.find((c) => c.email.toLowerCase() === email.trim().toLowerCase());
   if (!customer?.passwordHash || customer.passwordHash !== (await hash(password)))
     throw new Error(authMessages["Invalid login credentials"]);
-  session.set({ customerId: customer.id });
-  return customer;
+  session.set({ admin: false, adminEmail: undefined, customerId: customer.id });
+  return "customer";
 }
 
 export async function signOut() {
@@ -217,25 +227,6 @@ export async function signOut() {
     await remote.auth.signOut();
     await reloadAll();
   }
-}
-
-const LOCAL_ADMIN = { email: "admin@mastter.cell", password: "mastter123" };
-
-export async function adminSignIn(email: string, password: string) {
-  if (!remote) {
-    if (email.trim().toLowerCase() !== LOCAL_ADMIN.email || password !== LOCAL_ADMIN.password) throw new Error("Credenciais inválidas");
-    session.set({ admin: true, adminEmail: LOCAL_ADMIN.email });
-    return;
-  }
-  const { data, error } = await remote.auth.signInWithPassword({ email: email.trim(), password });
-  if (error) throw authError(error.message);
-  const { data: allowed } = await remote.rpc("is_admin");
-  if (!allowed) {
-    await remote.auth.signOut();
-    throw new Error("Essa conta não tem acesso ao painel.");
-  }
-  session.set({ admin: true, adminEmail: data.user.email, customerId: undefined });
-  await reloadAll();
 }
 
 export function watchAuth() {
