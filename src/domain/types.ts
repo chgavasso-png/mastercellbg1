@@ -94,6 +94,15 @@ export interface Expense extends Entity {
   date: string;
 }
 
+/** Receita lançada à mão no faturamento (fora das vendas do site/balcão e da assistência). */
+export interface Income extends Entity {
+  description: string;
+  category: "servico" | "venda" | "outros";
+  amount: number;
+  date: string;
+  payment?: Payment;
+}
+
 export type ShipmentStatus = "aguardando" | "postado" | "transito" | "entregue";
 
 export interface Shipment extends Entity {

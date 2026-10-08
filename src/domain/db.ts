@@ -1,6 +1,6 @@
 import { createCollection, createDocument, isRemote } from "@/core/store";
 import * as seed from "./seed";
-import type { Customer, Expense, InstaPost, Order, Product, Promotion, Purchase, Repair, Shipment } from "./types";
+import type { Customer, Expense, Income, InstaPost, Order, Product, Promotion, Purchase, Repair, Shipment } from "./types";
 
 export const db = {
   products: createCollection<Product>("products", seed.seedProducts),
@@ -8,6 +8,7 @@ export const db = {
   orders: createCollection<Order>("orders", seed.seedOrders),
   purchases: createCollection<Purchase>("purchases", seed.seedPurchases),
   expenses: createCollection<Expense>("expenses", seed.seedExpenses),
+  incomes: createCollection<Income>("incomes"),
   shipments: createCollection<Shipment>("shipments", seed.seedShipments),
   repairs: createCollection<Repair>("repairs", seed.seedRepairs),
   posts: createCollection<InstaPost>("posts", seed.seedPosts),
