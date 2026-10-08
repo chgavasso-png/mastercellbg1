@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bike, Clock, MapPin, Package, Truck } from "lucide-react";
+import { Bike, CalendarClock, Car, Clock, ExternalLink, MapPin, Package, Truck } from "lucide-react";
 import { definePlugin } from "@/core/plugins";
 import { events } from "@/core/events";
 import { useCollection } from "@/core/store";
@@ -7,6 +7,7 @@ import { db, session } from "@/domain/db";
 import { setOrderStatus } from "@/domain/services";
 import type { Order, Shipment, ShipmentStatus } from "@/domain/types";
 import { day, money } from "@/core/format";
+import { linkLabel, safeLink, slotLabel } from "@/core/delivery";
 import { Kpi, PageHead } from "@/admin/kit";
 import { Modal } from "@/ui/Modal";
 import { shipmentStatus } from "@/ui/status";
@@ -18,7 +19,7 @@ const columns: ShipmentStatus[] = ["aguardando", "postado", "transito", "entregu
 function mirror(id: string) {
   const s = db.shipments.get(id);
   if (!s || !db.orders.get(s.orderId)) return;
-  db.orders.update(s.orderId, { shipment: { status: s.status, carrier: s.carrier, tracking: s.tracking, eta: s.eta } });
+  db.orders.update(s.orderId, { shipment: { status: s.status, carrier: s.carrier, tracking: s.tracking, eta: s.eta, slot: s.slot, link: s.link } });
 }
 
 function move(shipment: Shipment, status: ShipmentStatus) {
@@ -97,11 +98,16 @@ function Logistics() {
                 <article key={s.id} className="kanban-card" draggable onDragStart={() => setDrag(s.id)} onClick={() => setEdit(s)}>
                   <div className="row between">
                     <b>{s.orderCode}</b>
-                    <span className="pill plain">{s.carrier === "Motoboy" ? <Bike /> : <Truck />}{s.carrier}</span>
+                    <span className="pill plain">{s.carrier === "Motoboy" ? <Bike /> : s.carrier === "Uber" || s.carrier === "99" ? <Car /> : <Truck />}{s.carrier}</span>
                   </div>
                   <span>{s.customerName}</span>
                   {s.address && <span className="row faint"><MapPin />{s.address.street}</span>}
-                  <span className="row faint"><Clock />{s.tracking ?? "sem rastreio"} · prev. {s.eta ? day(s.eta) : "—"}</span>
+                  {s.slot?.date ? (
+                    <span className="row"><CalendarClock />{slotLabel(s.slot)}</span>
+                  ) : (
+                    <span className="row faint"><Clock />{s.tracking || "sem rastreio"} · prev. {s.eta ? day(s.eta) : "—"}</span>
+                  )}
+                  {safeLink(s.link) && <span className="row faint"><ExternalLink />{linkLabel(safeLink(s.link)!)}</span>}
                 </article>
               ))}
             </div>
@@ -118,6 +124,9 @@ function Logistics() {
               <button className="btn ghost" onClick={() => setEdit(null)}>Fechar</button>
               <button className="btn primary" onClick={() => {
                 const { id, status, ...rest } = edit;
+                if (rest.link && !safeLink(rest.link)) return toast("Link inválido — cole o endereço completo (https://…)");
+                rest.link = safeLink(rest.link);
+                if (!rest.slot?.date) rest.slot = undefined;
                 db.shipments.update(id, rest);
                 const original = shipments.find((s) => s.id === id);
                 if (original && original.status !== status) move(original, status);
@@ -132,12 +141,26 @@ function Logistics() {
             <label className="field">
               <span>Transportadora</span>
               <select value={edit.carrier} onChange={(e) => setEdit({ ...edit, carrier: e.target.value as Shipment["carrier"] })}>
-                {["Correios", "Motoboy", "Jadlog", "Retirada"].map((c) => <option key={c}>{c}</option>)}
+                {["Motoboy", "Uber", "99", "Correios", "Jadlog", "Retirada"].map((c) => <option key={c}>{c}</option>)}
               </select>
             </label>
             <label className="field"><span>Código de rastreio</span><input value={edit.tracking ?? ""} onChange={(e) => setEdit({ ...edit, tracking: e.target.value })} /></label>
             <label className="field"><span>Custo do frete</span><input type="number" step="0.01" value={edit.cost} onChange={(e) => setEdit({ ...edit, cost: +e.target.value })} /></label>
             <label className="field"><span>Previsão</span><input type="date" value={edit.eta?.slice(0, 10) ?? ""} onChange={(e) => setEdit({ ...edit, eta: new Date(`${e.target.value}T12:00`).toISOString() })} /></label>
+            <label className="field"><span>Dia da entrega</span><input type="date" value={edit.slot?.date ?? ""} onChange={(e) => setEdit({ ...edit, slot: { ...edit.slot, date: e.target.value } })} /></label>
+            <div className="field">
+              <span>Horário</span>
+              <div className="row" style={{ gap: 6 }}>
+                <input type="time" aria-label="Das" value={edit.slot?.from ?? ""} onChange={(e) => setEdit({ ...edit, slot: { date: edit.slot?.date ?? "", ...edit.slot, from: e.target.value || undefined } })} />
+                <span className="faint">às</span>
+                <input type="time" aria-label="Até" value={edit.slot?.to ?? ""} onChange={(e) => setEdit({ ...edit, slot: { date: edit.slot?.date ?? "", ...edit.slot, to: e.target.value || undefined } })} />
+              </div>
+            </div>
+            <label className="field span-2">
+              <span>Link de acompanhamento (opcional)</span>
+              <input type="url" inputMode="url" placeholder="Corrida da 99/Uber, localização do WhatsApp, Google Maps…" value={edit.link ?? ""} onChange={(e) => setEdit({ ...edit, link: e.target.value || undefined })} />
+              {edit.link && safeLink(edit.link) && <small className="faint">O cliente verá o botão “{linkLabel(safeLink(edit.link)!)}”.</small>}
+            </label>
             <label className="field span-2">
               <span>Status</span>
               <select value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value as ShipmentStatus })}>

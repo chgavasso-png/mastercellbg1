@@ -1809,3 +1809,14 @@
   height: 16px;
   flex: none;
 }
+
+.ship-info {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.ship-info .row svg {
+  width: 16px;
+  height: 16px;
+}

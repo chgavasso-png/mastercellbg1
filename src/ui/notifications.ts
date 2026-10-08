@@ -1,6 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useCollection } from "@/core/store";
 import { day, money } from "@/core/format";
+import { linkLabel, safeLink, slotLabel } from "@/core/delivery";
 import { db } from "@/domain/db";
 import type { Customer, Order, Repair } from "@/domain/types";
 import { orderStatus, repairStatus, shipmentStatus } from "./status";
@@ -99,16 +100,21 @@ function repairText(r: Repair, before: string) {
   return r.note ? `${head}: nova observação da loja — "${r.note}"` : `${head}: a loja atualizou sua OS`;
 }
 
-const orderSig = (o: Order) => sig(o.status, o.shipment?.status, o.shipment?.carrier, o.shipment?.tracking, o.shipment?.eta, o.tradeIn?.value);
+const orderSig = (o: Order) =>
+  sig(o.status, o.shipment?.status, o.shipment?.carrier, o.shipment?.tracking, o.shipment?.eta, o.tradeIn?.value, slotLabel(o.shipment?.slot), o.shipment?.link);
 
 function orderText(o: Order, before: string) {
-  const [status, shipStatus, carrier, tracking, eta, tradeValue] = parts(before);
+  const [status, shipStatus, carrier, tracking, eta, tradeValue, slot = "", link = ""] = parts(before);
   const head = `Pedido ${o.code}`;
   const s = o.shipment;
   if (status !== o.status) {
     if (o.status === "entregue") return `${head} foi entregue. Obrigado pela compra!`;
     return `${head}: ${orderStatus[o.status].label}`;
   }
+  const nowSlot = slotLabel(s?.slot);
+  if (s && nowSlot && slot !== nowSlot) return `${head}: entrega agendada para ${nowSlot}`;
+  const nowLink = safeLink(s?.link);
+  if (nowLink && link !== (s?.link ?? "")) return `${head}: ${linkLabel(nowLink).toLowerCase()} — toque para abrir seu pedido`;
   if (s && shipStatus !== s.status) return `${head}: entrega — ${shipmentStatus[s.status].label}${s.carrier !== "Retirada" ? ` (${s.carrier})` : ""}`;
   if (s?.tracking && tracking !== s.tracking) return `${head}: código de rastreio ${s.tracking}`;
   if (s?.eta && eta !== s.eta) return `${head}: nova previsão de entrega ${day(s.eta)}`;

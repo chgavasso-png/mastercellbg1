@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Download, LogOut, Package, User, Users, Wrench } from "lucide-react";
+import { CalendarClock, Download, ExternalLink, LogOut, Package, User, Users, Wrench } from "lucide-react";
 import { definePlugin } from "@/core/plugins";
 import { useCollection, useDocument } from "@/core/store";
 import { db, session } from "@/domain/db";
@@ -10,6 +10,7 @@ import { AuthLoading, AuthTransition } from "@/ui/AuthTransition";
 import { useSignIn } from "@/ui/useSignIn";
 import type { Address, Customer } from "@/domain/types";
 import { day, money, stamp } from "@/core/format";
+import { linkLabel, safeLink, slotLabel } from "@/core/delivery";
 import { Card, Kpi, PageHead, SearchBox, Table, matches, type Column } from "@/admin/kit";
 import { Modal } from "@/ui/Modal";
 import { Pulse } from "@/ui/Pulse";
@@ -153,11 +154,19 @@ function AccountArea({ customer }: { customer: Customer }) {
                       </p>
                     )}
                     {o.shipment && o.shipment.carrier !== "Retirada" && (
-                      <p className="faint">
-                        <Status map={shipmentStatus} value={o.shipment.status} /> {o.shipment.carrier}
-                        {o.shipment.tracking && <> · rastreio <b>{o.shipment.tracking}</b></>}
-                        {o.shipment.eta && o.shipment.status !== "entregue" && <> · previsão {day(o.shipment.eta)}</>}
-                      </p>
+                      <div className="ship-info">
+                        <p className="faint">
+                          <Status map={shipmentStatus} value={o.shipment.status} /> {o.shipment.carrier}
+                          {o.shipment.tracking && <> · rastreio <b>{o.shipment.tracking}</b></>}
+                          {!o.shipment.slot?.date && o.shipment.eta && o.shipment.status !== "entregue" && <> · previsão {day(o.shipment.eta)}</>}
+                        </p>
+                        {o.shipment.slot?.date && o.shipment.status !== "entregue" && (
+                          <p className="row"><CalendarClock />Entrega agendada: <b>{slotLabel(o.shipment.slot)}</b></p>
+                        )}
+                        {safeLink(o.shipment.link) && o.shipment.status !== "entregue" && (
+                          <a className="btn soft sm" href={safeLink(o.shipment.link)} target="_blank" rel="noreferrer noopener"><ExternalLink />{linkLabel(safeLink(o.shipment.link)!)}</a>
+                        )}
+                      </div>
                     )}
                     <div className="row between">
                       <span className="faint">{o.delivery === "entrega" ? "Entrega em domicílio" : "Retirada na loja"}</span>

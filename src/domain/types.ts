@@ -75,7 +75,7 @@ export interface Order extends Entity {
   coupon?: string;
   tradeIn?: TradeIn;
   /** Cópia da entrega (logística) dentro do pedido, para o cliente — que não lê a coleção de entregas — acompanhar. */
-  shipment?: Pick<Shipment, "status" | "carrier" | "tracking" | "eta">;
+  shipment?: Pick<Shipment, "status" | "carrier" | "tracking" | "eta" | "slot" | "link">;
 }
 
 export interface Purchase extends Entity {
@@ -100,8 +100,12 @@ export interface Shipment extends Entity {
   orderId: string;
   orderCode: string;
   customerName: string;
-  carrier: "Correios" | "Motoboy" | "Jadlog" | "Retirada";
+  carrier: "Correios" | "Motoboy" | "Uber" | "99" | "Jadlog" | "Retirada";
   tracking?: string;
+  /** Dia e faixa de horário combinados para a entrega. */
+  slot?: { date: string; from?: string; to?: string };
+  /** Link de acompanhamento: corrida da 99/Uber, localização do WhatsApp, Google Maps… */
+  link?: string;
   status: ShipmentStatus;
   address?: Address;
   cost: number;
