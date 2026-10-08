@@ -161,6 +161,19 @@ export async function requestRepair(data: Omit<Repair, "id" | "createdAt" | "pro
   return repair;
 }
 
+/** Cliente aceita ou recusa o orçamento. Pelo protocolo, para funcionar também sem login. */
+export async function answerQuote(protocol: string, accept: boolean) {
+  const answer = accept ? ("aceito" as const) : ("recusado" as const);
+  const patch = accept ? { answer, status: "aprovado" as const } : { answer };
+  const repair = db.repairs.find((r) => r.protocol === protocol);
+  if (remote) {
+    const { error } = await remote.rpc("answer_quote", { code: protocol, accept });
+    if (error) throw new Error(error.message);
+    if (repair) db.repairs.patchLocal(repair.id, patch);
+  } else if (repair) db.repairs.update(repair.id, patch);
+  return patch;
+}
+
 const authMessages: Record<string, string> = {
   "Invalid login credentials": "E-mail ou senha não conferem.",
   "User already registered": "Esse e-mail já tem cadastro. Que tal entrar?",

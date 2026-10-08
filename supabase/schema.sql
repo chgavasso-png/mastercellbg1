@@ -51,12 +51,31 @@ as $$
     'device', data->>'device',
     'status', data->>'status',
     'quote', data->'quote',
-    'note', data->>'note'
+    'note', data->>'note',
+    'answer', data->>'answer'
   )
   from public.records
   where collection = 'repairs' and lower(data->>'protocol') = lower(trim(code))
   limit 1;
 $$;
+
+create or replace function public.answer_quote(code text, accept boolean)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.records
+  set data = data
+    || jsonb_build_object('answer', case when accept then 'aceito' else 'recusado' end)
+    || case when accept then jsonb_build_object('status', 'aprovado') else '{}'::jsonb end
+  where collection = 'repairs'
+    and lower(data->>'protocol') = lower(trim(code))
+    and data->>'status' = 'orcamento'
+    and data->'quote' is not null;
+$$;
+
+grant execute on function public.answer_quote(text, boolean) to anon, authenticated;
 
 create or replace function public.apply_order_stock()
 returns trigger

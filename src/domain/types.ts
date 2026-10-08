@@ -124,6 +124,10 @@ export interface Repair extends Entity {
   status: RepairStatus;
   quote?: number;
   note?: string;
+  /** Fotos do aparelho enviadas pelo cliente (data URL). */
+  photos?: string[];
+  /** Resposta do cliente ao orçamento. */
+  answer?: "aceito" | "recusado";
 }
 
 export interface InstaPost extends Entity {

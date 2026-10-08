@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
 
-async function shrink(file: File, max = 720) {
+export async function shrink(file: File, max = 720) {
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.src = url;

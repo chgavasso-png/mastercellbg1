@@ -11,6 +11,7 @@ import { Card, Kpi, PageHead, SearchBox, Table, matches, type Column } from "@/a
 import { Modal } from "@/ui/Modal";
 import { Pulse } from "@/ui/Pulse";
 import { Status, orderStatus, repairStatus } from "@/ui/status";
+import { QuoteAnswer } from "@/ui/QuoteAnswer";
 import { toast } from "@/ui/Toast";
 
 const emptyAddress: Address = { street: "", district: "", city: "Barra do Garças", zip: "" };
@@ -164,6 +165,7 @@ function AccountArea({ customer }: { customer: Customer }) {
                     <div className="row between wrap"><b>{r.protocol} · {r.device}</b><Status map={repairStatus} value={r.status} /></div>
                     <p className="muted">{r.issue}{r.quote ? ` · orçamento ${money(r.quote)}` : ""}</p>
                     {r.note && <p className="faint">{r.note}</p>}
+                    <QuoteAnswer repair={r} />
                   </li>
                 ))}
               </ul>

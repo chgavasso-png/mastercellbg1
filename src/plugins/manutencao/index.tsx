@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { remote } from "@/core/remote";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   BatteryWarning, Bug, Camera, CircleCheck, Cpu, Droplets, HardDrive, Keyboard, Laptop, MessageCircle, Monitor, MonitorOff, Plug,
   Search, Smartphone, Tablet, Thermometer, Turtle, Volume2, Wrench, Store, Bike, type LucideIcon,
@@ -15,6 +15,8 @@ import { Card, Kpi, PageHead, SearchBox, Table, Tabs, matches, type Column } fro
 import { Modal } from "@/ui/Modal";
 import { Pulse } from "@/ui/Pulse";
 import { Status, repairStatus } from "@/ui/status";
+import { PhotoPicker } from "@/ui/PhotoPicker";
+import { QuoteAnswer } from "@/ui/QuoteAnswer";
 import { toast } from "@/ui/Toast";
 
 export const deviceIcons: Record<DeviceKind, LucideIcon> = {
@@ -62,7 +64,7 @@ const issues: Record<DeviceKind, Issue[]> = {
   ],
 };
 
-type Tracked = Pick<Repair, "protocol" | "device" | "status" | "quote" | "note">;
+type Tracked = Pick<Repair, "protocol" | "device" | "status" | "quote" | "note" | "answer">;
 
 function useTracking(code: string) {
   const repairs = useCollection(db.repairs);
@@ -94,18 +96,21 @@ function RepairPage() {
     email: customer?.email ?? "",
     kind: "celular" as DeviceKind,
     device: "",
-    issue: "",
+    issues: [] as string[],
+    photos: [] as string[],
     details: "",
     pickup: "loja" as Repair["pickup"],
   });
   const [done, setDone] = useState<Repair | null>(null);
-  const [lookup, setLookup] = useState("");
+  const [params] = useSearchParams();
+  const [lookup, setLookup] = useState(params.get("os") ?? "");
   const found = useTracking(lookup);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.issue) return toast("Escolha o problema do aparelho");
-    setDone(await requestRepair({ ...form, customerId: customer?.id }));
+    if (!form.issues.length) return toast("Escolha pelo menos um serviço");
+    const { issues, photos, ...data } = form;
+    setDone(await requestRepair({ ...data, issue: issues.join(", "), photos: photos.length ? photos : undefined, customerId: customer?.id }));
     window.scrollTo({ top: 0 });
   };
 
@@ -142,17 +147,24 @@ function RepairPage() {
               {deviceKinds.map((d) => {
                 const Icon = deviceIcons[d.id];
                 return (
-                  <button type="button" key={d.id} className={form.kind === d.id ? "on" : ""} onClick={() => setForm({ ...form, kind: d.id, issue: "" })}>
+                  <button type="button" key={d.id} className={form.kind === d.id ? "on" : ""} onClick={() => setForm({ ...form, kind: d.id, issues: [] })}>
                     <Icon />{d.label}
                   </button>
                 );
               })}
             </div>
 
-            <h3 style={{ marginTop: 28 }}><span className="step">2</span>Qual o problema?</h3>
+            <h3 style={{ marginTop: 28 }}><span className="step">2</span>Quais serviços?</h3>
+            <p className="faint" style={{ margin: "-6px 0 12px" }}>Pode marcar mais de um.</p>
             <div className="issues">
               {issues[form.kind].map(({ label, icon: Icon }) => (
-                <button type="button" key={label} className={form.issue === label ? "on" : ""} onClick={() => setForm({ ...form, issue: label })}>
+                <button
+                  type="button"
+                  key={label}
+                  aria-pressed={form.issues.includes(label)}
+                  className={form.issues.includes(label) ? "on" : ""}
+                  onClick={() => setForm({ ...form, issues: form.issues.includes(label) ? form.issues.filter((i) => i !== label) : [...form.issues, label] })}
+                >
                   <Icon />{label}
                 </button>
               ))}
@@ -160,6 +172,11 @@ function RepairPage() {
             <div className="grid-2" style={{ marginTop: 18 }}>
               <label className="field"><span>Marca e modelo</span><input required placeholder={deviceKinds.find((d) => d.id === form.kind)?.example} value={form.device} onChange={(e) => setForm({ ...form, device: e.target.value })} /></label>
               <label className="field"><span>Conte mais detalhes</span><input placeholder="Caiu, molhou, parou do nada…" value={form.details} onChange={(e) => setForm({ ...form, details: e.target.value })} /></label>
+            </div>
+
+            <div className="field" style={{ marginTop: 18 }}>
+              <span>Fotos do aparelho (opcional, até 4)</span>
+              <PhotoPicker value={form.photos} onChange={(photos) => setForm({ ...form, photos })} />
             </div>
 
             <h3 style={{ marginTop: 28 }}><span className="step">3</span>Seus dados</h3>
@@ -201,6 +218,7 @@ function RepairPage() {
                 </div>
                 {found.quote && <p>Orçamento: <b>{money(found.quote)}</b></p>}
                 {found.note && <p className="muted">{found.note}</p>}
+                <QuoteAnswer key={found.protocol} repair={found} />
               </div>
             )}
             {lookup.trim().length >= 4 && !found && <p className="faint" style={{ marginTop: 10 }}>Protocolo não encontrado.</p>}
@@ -251,7 +269,17 @@ function RepairsAdmin() {
     },
     { key: "customer", label: "Cliente", sort: (r) => r.customerName, render: (r) => <div className="cell-main" style={{ minWidth: 150 }}><div><b>{r.customerName}</b><span className="faint">{r.phone}</span></div></div> },
     { key: "date", label: "Entrada", sort: (r) => r.createdAt, render: (r) => <span className="muted">{stamp(r.createdAt)}</span> },
-    { key: "status", label: "Status", render: (r) => <Status map={repairStatus} value={r.status} /> },
+    {
+      key: "status",
+      label: "Status",
+      render: (r) => (
+        <div className="row" style={{ gap: 6 }}>
+          <Status map={repairStatus} value={r.status} />
+          {r.answer === "recusado" && <span className="pill bad">recusado</span>}
+          {r.photos?.length ? <span className="pill" title="Fotos enviadas pelo cliente"><Camera />{r.photos.length}</span> : null}
+        </div>
+      ),
+    },
     { key: "quote", label: "Orçamento", align: "right", render: (r) => (r.quote ? <b className="tabular">{money(r.quote)}</b> : <span className="faint">—</span>) },
   ];
 
@@ -283,12 +311,15 @@ function RepairsAdmin() {
           onClose={() => setEdit(null)}
           footer={
             <>
-              <a className="btn ghost" href={`https://wa.me/55${edit.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${edit.customerName.split(" ")[0]}! Sobre a ${edit.protocol} (${edit.device}): ${repairStatus[edit.status].label}${edit.quote ? ` · orçamento ${money(edit.quote)}` : ""}.`)}`} target="_blank" rel="noreferrer">
+              <a className="btn ghost" href={`https://wa.me/55${edit.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${edit.customerName.split(" ")[0]}! Sobre a ${edit.protocol} (${edit.device}): ${repairStatus[edit.status].label}${edit.quote ? ` · orçamento ${money(edit.quote)}` : ""}.${edit.status === "orcamento" && edit.quote ? ` Aceite ou recuse aqui: ${window.location.origin}/assistencia?os=${edit.protocol}` : ""}`)}`} target="_blank" rel="noreferrer">
                 <MessageCircle />Avisar cliente
               </a>
               <span style={{ flex: 1 }} />
               <button className="btn primary" onClick={() => {
                 const { id, ...data } = edit;
+                const before = db.repairs.get(id);
+                // Orçamento novo ou reenviado: o cliente precisa responder de novo.
+                if (before && (before.quote !== data.quote || (data.status === "orcamento" && before.status !== "orcamento"))) data.answer = undefined;
                 db.repairs.update(id, data);
                 setEdit(null);
                 toast("OS atualizada");
@@ -307,7 +338,20 @@ function RepairsAdmin() {
             <div><span>Atendimento</span><b>{edit.pickup === "coleta" ? "Coleta" : "Na loja"}</b></div>
             <div><span>Tipo</span><b>{deviceLabel(edit.kind)}</b></div>
             <div className="span-all"><span>Relato</span><b>{edit.issue} — {edit.details || "sem detalhes"}</b></div>
+            {edit.answer && (
+              <div className="span-all"><span>Resposta do cliente</span><b>{edit.answer === "aceito" ? "Aceitou o orçamento" : "Recusou o orçamento"}</b></div>
+            )}
           </div>
+          {edit.photos?.length ? (
+            <div className="field">
+              <span>Fotos enviadas pelo cliente</span>
+              <div className="photos">
+                {edit.photos.map((src, i) => (
+                  <a key={i} className="photo" href={src} target="_blank" rel="noreferrer"><img src={src} alt={`Foto ${i + 1}`} /></a>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <div className="grid-2">
             <label className="field">
               <span>Status</span>
