@@ -4,7 +4,8 @@ import { Download, LogOut, Package, User, Users, Wrench } from "lucide-react";
 import { definePlugin } from "@/core/plugins";
 import { useCollection, useDocument } from "@/core/store";
 import { db, session } from "@/domain/db";
-import { ensureCurrentCustomer, registerCustomer, signOut, useCustomer } from "@/domain/services";
+import { ensureCurrentCustomer, registerCustomer, useCustomer } from "@/domain/services";
+import { useSignOut } from "@/ui/useSignOut";
 import { AuthLoading, AuthTransition } from "@/ui/AuthTransition";
 import { useSignIn } from "@/ui/useSignIn";
 import type { Address, Customer } from "@/domain/types";
@@ -107,6 +108,7 @@ function AuthForms() {
 }
 
 function AccountArea({ customer }: { customer: Customer }) {
+  const signOut = useSignOut();
   const orders = useCollection(db.orders).filter((o) => o.customerId === customer.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const repairs = useCollection(db.repairs).filter((r) => r.customerId === customer.id || (r.phone && r.phone === customer.phone));
   type Tab = "pedidos" | "assistencia" | "dados";
@@ -207,6 +209,7 @@ function AccountArea({ customer }: { customer: Customer }) {
 }
 
 function AccountPage() {
+  const signOut = useSignOut();
   const customer = useCustomer();
   const { customerId } = useDocument(session);
   const loading = Boolean(customerId && !customer);

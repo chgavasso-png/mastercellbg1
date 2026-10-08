@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
+import { NavLink, Outlet, useLocation, Link } from "react-router-dom";
 import { ExternalLink, LayoutDashboard, LogOut, Menu, Puzzle, RotateCcw } from "lucide-react";
 import { adminPages, plugins } from "@/core/plugins";
 import { useDocument } from "@/core/store";
 import { resetAll, session, store } from "@/domain/db";
-import { signOut } from "@/domain/services";
+import { useSignOut } from "@/ui/useSignOut";
 import { isRemote } from "@/core/store";
 import { Brand } from "@/site/Brand";
 import { Modal } from "@/ui/Modal";
@@ -19,7 +19,7 @@ export function AdminLayout() {
   const [open, setOpen] = useState(false);
   const [about, setAbout] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
+  const signOut = useSignOut();
   const notes = useAdminNotifications();
 
   useEffect(() => setOpen(false), [location.pathname]);
@@ -56,7 +56,7 @@ export function AdminLayout() {
         <div className="a-side-foot">
           <button onClick={() => setAbout(true)}><Puzzle />{plugins().length} módulos ativos</button>
           <Link to="/" target="_blank"><ExternalLink />Ver loja</Link>
-          <button onClick={async () => { navigate("/", { replace: true }); await signOut(); }}><LogOut />Sair</button>
+          <button onClick={signOut}><LogOut />Sair</button>
         </div>
       </aside>
       <div className="a-scrim" onClick={() => setOpen(false)} />

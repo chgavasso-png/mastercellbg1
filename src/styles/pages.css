@@ -1785,9 +1785,6 @@
   border-color: var(--ink-3);
 }
 
-a.photo {
-  display: block;
-}
 
 .quote-answer {
   display: grid;

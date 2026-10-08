@@ -677,3 +677,69 @@ p {
   width: 18px;
   height: 18px;
 }
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 64px 16px 24px;
+  background: rgb(0 0 0 / 0.88);
+  animation: fade 0.15s var(--ease);
+}
+
+.lightbox img {
+  max-width: 100%;
+  max-height: calc(100dvh - 96px);
+  border-radius: 12px;
+  object-fit: contain;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.5);
+}
+
+.lightbox-bar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lightbox-bar span {
+  margin-right: 6px;
+}
+
+.lightbox .icon-btn {
+  color: #fff;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.lightbox .icon-btn:hover {
+  background: rgb(255 255 255 / 0.24);
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox-nav.prev {
+  left: 12px;
+}
+
+.lightbox-nav.next {
+  right: 12px;
+}
+
+button.photo {
+  padding: 0;
+  cursor: zoom-in;
+}

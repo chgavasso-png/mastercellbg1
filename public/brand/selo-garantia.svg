@@ -8,6 +8,6 @@
     <textPath href="#ring">GARANTIA REAL • MASTER CELL • GARANTIA REAL •</textPath>
   </text>
   <circle cx="120" cy="120" r="62" fill="#fcd404"/>
-  <text x="120" y="122" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-style="italic" font-size="46" fill="#070c2f">90</text>
+  <text x="120" y="122" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-style="italic" font-size="44" fill="#070c2f">180</text>
   <text x="120" y="150" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="16" letter-spacing="3" fill="#070c2f">DIAS</text>
 </svg>

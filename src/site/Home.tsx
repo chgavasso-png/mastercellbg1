@@ -47,13 +47,13 @@ export function Home() {
             <dl className="hero-stats">
               <div><dt>Grátis</dt><dd>orçamento sem compromisso</dd></div>
               <div><dt>12x</dt><dd>no cartão, com taxas baixas</dd></div>
-              <div><dt>90 dias</dt><dd>de garantia em reparos</dd></div>
+              <div><dt>180 dias</dt><dd>de garantia em reparos</dd></div>
             </dl>
           </div>
           <div className="hero-visual">
             <div className="hero-glow" />
             <img src="/brand/logo.png" alt="MasterCell" className="hero-logo" />
-            <img src="/brand/selo-garantia.svg" alt="Garantia de 90 dias" className="hero-seal" />
+            <img src="/brand/selo-garantia.svg" alt="Garantia de 180 dias" className="hero-seal" />
             <div className="hero-chip chip-a"><Zap /> Conserto de celular, notebook e PC</div>
             <div className="hero-chip chip-b"><Truck /> Entrega na cidade</div>
           </div>

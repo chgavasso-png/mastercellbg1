@@ -1,15 +1,16 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { LayoutDashboard, LogOut, Package, User, Wrench } from "lucide-react";
 import { useDocument } from "@/core/store";
 import { session } from "@/domain/db";
-import { signOut, useCustomer } from "@/domain/services";
+import { useCustomer } from "@/domain/services";
+import { useSignOut } from "@/ui/useSignOut";
 import { Dropdown } from "@/ui/Dropdown";
 
 /** Ícone de usuário no topo: sem login leva para entrar; logado abre o menu da conta. */
 export function UserMenu() {
   const customer = useCustomer();
   const { admin, adminEmail } = useDocument(session);
-  const navigate = useNavigate();
+  const signOut = useSignOut();
 
   if (!customer && !admin)
     return <Link to="/conta" className="icon-btn" aria-label="Entrar" title="Entrar"><User /></Link>;
@@ -17,7 +18,6 @@ export function UserMenu() {
   const name = customer?.name ?? "Administrador";
   const out = async (close: () => void) => {
     close();
-    navigate("/", { replace: true });
     await signOut();
   };
 

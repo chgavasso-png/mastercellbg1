@@ -17,6 +17,7 @@ import { Pulse } from "@/ui/Pulse";
 import { Status, repairStatus } from "@/ui/status";
 import { PhotoPicker } from "@/ui/PhotoPicker";
 import { QuoteAnswer } from "@/ui/QuoteAnswer";
+import { Lightbox } from "@/ui/Lightbox";
 import { toast } from "@/ui/Toast";
 
 export const deviceIcons: Record<DeviceKind, LucideIcon> = {
@@ -228,7 +229,7 @@ function RepairPage() {
             <ul>
               <li><CircleCheck />Orçamento sem compromisso</li>
               <li><CircleCheck />Peças testadas antes da troca</li>
-              <li><CircleCheck />Garantia de 90 dias no serviço</li>
+              <li><CircleCheck />Garantia de 180 dias (6 meses) no serviço</li>
               <li><CircleCheck />Seus dados preservados</li>
               <li><CircleCheck />Celular, tablet, notebook e PC</li>
             </ul>
@@ -250,6 +251,7 @@ function RepairsAdmin() {
   const [kind, setKind] = useState<"todos" | DeviceKind>("todos");
   const [q, setQ] = useState("");
   const [edit, setEdit] = useState<Repair | null>(null);
+  const [photo, setPhoto] = useState<number | null>(null);
 
   const rows = [...repairs]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -302,7 +304,7 @@ function RepairsAdmin() {
         />
       </div>
       <Card className="flush">
-        <Table rows={rows} columns={columns} onRow={(r) => setEdit({ ...r })} />
+        <Table rows={rows} columns={columns} onRow={(r) => { setPhoto(null); setEdit({ ...r }); }} />
       </Card>
 
       {edit && (
@@ -353,9 +355,10 @@ function RepairsAdmin() {
               <span>Fotos enviadas pelo cliente</span>
               <div className="photos">
                 {edit.photos.map((src, i) => (
-                  <a key={i} className="photo" href={src} target="_blank" rel="noreferrer"><img src={src} alt={`Foto ${i + 1}`} /></a>
+                  <button key={i} type="button" className="photo" onClick={() => setPhoto(i)} aria-label={`Ampliar foto ${i + 1}`}><img src={src} alt={`Foto ${i + 1}`} /></button>
                 ))}
               </div>
+              {photo !== null && <Lightbox images={edit.photos} index={photo} onIndex={setPhoto} onClose={() => setPhoto(null)} />}
             </div>
           ) : null}
           <div className="grid-2">
