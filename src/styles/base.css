@@ -743,3 +743,33 @@ button.photo {
   padding: 0;
   cursor: zoom-in;
 }
+
+.install-help {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
+.install-help img {
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+}
+
+.install-help ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+}
+
+.install-help ol svg {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+}
+
+.install-help p {
+  margin: 0;
+  text-align: center;
+}

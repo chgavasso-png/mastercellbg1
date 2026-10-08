@@ -3,6 +3,7 @@ import { ArrowRight, Lock } from "lucide-react";
 import { Pulse } from "@/ui/Pulse";
 import { AuthTransition } from "@/ui/AuthTransition";
 import { useSignIn } from "@/ui/useSignIn";
+import { InstallApp } from "@/ui/InstallApp";
 
 export function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -34,6 +35,7 @@ export function AdminLogin() {
         </label>
         {error && <small className="error">{error}</small>}
         <button className="btn primary lg block" disabled={busy}><Lock />{busy ? "Entrando…" : "Entrar"} <ArrowRight /></button>
+        <InstallApp className="link a-login-install" />
       </form>
       {login.phase && <AuthTransition phase={login.phase} />}
     </div>

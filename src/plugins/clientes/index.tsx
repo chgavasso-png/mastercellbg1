@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { CalendarClock, Download, ExternalLink, LogOut, Package, User, Users, Wrench } from "lucide-react";
+import { Download, LogOut, Package, User, Users, Wrench } from "lucide-react";
 import { definePlugin } from "@/core/plugins";
 import { useCollection, useDocument } from "@/core/store";
 import { db, session } from "@/domain/db";
@@ -10,11 +10,11 @@ import { AuthLoading, AuthTransition } from "@/ui/AuthTransition";
 import { useSignIn } from "@/ui/useSignIn";
 import type { Address, Customer } from "@/domain/types";
 import { day, money, stamp } from "@/core/format";
-import { linkLabel, safeLink, slotLabel } from "@/core/delivery";
 import { Card, Kpi, PageHead, SearchBox, Table, matches, type Column } from "@/admin/kit";
 import { Modal } from "@/ui/Modal";
 import { Pulse } from "@/ui/Pulse";
-import { Status, orderStatus, repairStatus, shipmentStatus } from "@/ui/status";
+import { Status, orderStatus, repairStatus } from "@/ui/status";
+import { OrderTracker } from "@/site/OrderTracker";
 import { QuoteAnswer } from "@/ui/QuoteAnswer";
 import { toast } from "@/ui/Toast";
 
@@ -153,23 +153,9 @@ function AccountArea({ customer }: { customer: Customer }) {
                         Seu {o.tradeIn.device} na troca · {o.tradeIn.value ? `avaliado em ${money(o.tradeIn.value)}` : "aguardando avaliação"}
                       </p>
                     )}
-                    {o.shipment && o.shipment.carrier !== "Retirada" && (
-                      <div className="ship-info">
-                        <p className="faint">
-                          <Status map={shipmentStatus} value={o.shipment.status} /> {o.shipment.carrier}
-                          {o.shipment.tracking && <> · rastreio <b>{o.shipment.tracking}</b></>}
-                          {!o.shipment.slot?.date && o.shipment.eta && o.shipment.status !== "entregue" && <> · previsão {day(o.shipment.eta)}</>}
-                        </p>
-                        {o.shipment.slot?.date && o.shipment.status !== "entregue" && (
-                          <p className="row"><CalendarClock />Entrega agendada: <b>{slotLabel(o.shipment.slot)}</b></p>
-                        )}
-                        {safeLink(o.shipment.link) && o.shipment.status !== "entregue" && (
-                          <a className="btn soft sm" href={safeLink(o.shipment.link)} target="_blank" rel="noreferrer noopener"><ExternalLink />{linkLabel(safeLink(o.shipment.link)!)}</a>
-                        )}
-                      </div>
-                    )}
+                    <OrderTracker order={o} />
                     <div className="row between">
-                      <span className="faint">{o.delivery === "entrega" ? "Entrega em domicílio" : "Retirada na loja"}</span>
+                      <span className="faint">{o.delivery === "entrega" ? "Entrega em casa" : "Retirada na loja"}</span>
                       <b className="tabular">{money(o.total)}</b>
                     </div>
                   </li>

@@ -104,7 +104,7 @@ export function SiteLayout() {
             <h4>Atendimento</h4>
             <Link to="/assistencia">Assistência técnica</Link>
             <Link to="/conta">Minha conta</Link>
-            <Link to="/conta">Meus pedidos</Link>
+            <Link to="/conta?aba=pedidos">Meus pedidos</Link>
           </div>
           <div>
             <h4>Visite</h4>

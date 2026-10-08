@@ -11,6 +11,7 @@ import { Modal } from "@/ui/Modal";
 import { toast } from "@/ui/Toast";
 import { AdminLogin } from "./AdminLogin";
 import { NotificationBell } from "@/ui/NotificationBell";
+import { InstallApp } from "@/ui/InstallApp";
 import { useAdminNotifications } from "@/ui/notifications";
 
 export function AdminLayout() {
@@ -56,6 +57,7 @@ export function AdminLayout() {
         <div className="a-side-foot">
           <button onClick={() => setAbout(true)}><Puzzle />{plugins().length} módulos ativos</button>
           <Link to="/" target="_blank"><ExternalLink />Ver loja</Link>
+          <InstallApp />
           <button onClick={signOut}><LogOut />Sair</button>
         </div>
       </aside>

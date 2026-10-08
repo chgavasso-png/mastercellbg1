@@ -11,6 +11,7 @@ import { Dashboard } from "@/admin/Dashboard";
 import { Toasts, toast } from "@/ui/Toast";
 import { onSyncError, whenReady } from "@/core/remote";
 import { watchAuth } from "@/domain/services";
+import { registerServiceWorker } from "@/ui/install";
 import "@/styles/palette.css";
 import "@/styles/base.css";
 import "@/styles/site.css";
@@ -47,6 +48,7 @@ onSyncError((message) => {
   toast(`Erro de conexão com o banco — ${message}`);
 });
 watchAuth();
+registerServiceWorker();
 
 const root = createRoot(document.getElementById("root")!);
 const render = () =>
